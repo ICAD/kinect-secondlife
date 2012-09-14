@@ -1,2 +1,2 @@
-kinect-secondlife
+Kinect SecondLife
 =================
