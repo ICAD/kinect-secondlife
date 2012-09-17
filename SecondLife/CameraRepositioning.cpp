@@ -412,7 +412,6 @@ void draw_stickfigure()
 {
 	
 	float fNewColor = 0;
-	float fMaxDepth;
 	xn::DepthMetaData dm;
 	g_DepthGenerator.GetMetaData(dm);
 	XnPoint3D corner = xnCreatePoint3D(dm.XRes(), dm.YRes(), dm.ZRes());
@@ -625,6 +624,8 @@ int main(int argc, char **argv)
 
 	return(0);
 }
+
+//TODO: Add a default case to control logic flow
 XnSkeletonJoint getJoint(int a)
 {
 
@@ -701,6 +702,10 @@ XnSkeletonJoint getJoint(int a)
 			break;
 	case 24:
 		return XN_SKEL_RIGHT_FOOT	;
+			break;
+	//TODO: reassess logic default
+	default:
+		return XN_SKEL_HEAD;
 			break;
 	}
 }

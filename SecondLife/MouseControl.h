@@ -48,7 +48,7 @@ void  Sendposition (XnUserID Player, int  id,XnSkeletonJoint Part , char  _Part 
 
  if  (!g_UserGenerator.GetSkeletonCap().IsTracking(Player))
  {
-  printf ( "not tracked! \ n" );
+  printf ( "not tracked! \n" );
   return ;
  }
  XnSkeletonJointPosition joint1;
@@ -217,7 +217,7 @@ void  Sendposition1(XnUserID Player, int  id,XnSkeletonJoint Part ,XnSkeletonJoi
 
  if  (!g_UserGenerator.GetSkeletonCap().IsTracking(Player))
  {
-  printf ( "not tracked! \ n" );
+  printf ( "not tracked! \n" );
   return ;
  }
  XnSkeletonJointPosition joint,joint1,joint2;
