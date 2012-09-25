@@ -1,9 +1,9 @@
-﻿Build started 9/17/2012 6:45:53 PM.
-     1>Project "C:\Users\Tyler\Research\Projects\kinect-secondlife\SecondLife\CameraRepositioning.vcxproj" on node 2 (clean target(s)).
+﻿Build started 9/25/2012 5:22:51 PM.
+     1>Project "C:\Users\rays\kinect-secondlife_git\SecondLife\CameraRepositioning.vcxproj" on node 2 (clean target(s)).
      1>_PrepareForClean:
          Deleting file "Debug\CameraRepositioning.lastbuildstate".
-     1>Done Building Project "C:\Users\Tyler\Research\Projects\kinect-secondlife\SecondLife\CameraRepositioning.vcxproj" (clean target(s)).
+     1>Done Building Project "C:\Users\rays\kinect-secondlife_git\SecondLife\CameraRepositioning.vcxproj" (clean target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:00.21
+Time Elapsed 00:00:00.02

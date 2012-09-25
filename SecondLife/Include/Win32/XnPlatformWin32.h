@@ -222,18 +222,19 @@ typedef size_t				XnSizeT;
 #endif
 
 /** Declares a global shared library export function. */ 
-#define XN_API_EXPORT_INIT()															\
-	BOOL APIENTRY DllMain (HMODULE /*hModule*/, DWORD nReasonForCall, LPVOID /*lpReserved*/)	\
-	{																					\
-		switch (nReasonForCall)															\
-		{																				\
-		case DLL_PROCESS_ATTACH:														\
-		case DLL_THREAD_ATTACH:															\
-		case DLL_THREAD_DETACH:															\
-		case DLL_PROCESS_DETACH:														\
-			break;																		\
-		}																				\
-		return TRUE;																	\
-	}
 
+#define XN_API_EXPORT_INIT()															
+	BOOL APIENTRY DllMain (HMODULE /*hModule*/, DWORD nReasonForCall, LPVOID /*lpReserved*/)	
+	{																					
+		switch (nReasonForCall)															
+		{																				
+		case DLL_PROCESS_ATTACH:														
+		case DLL_THREAD_ATTACH:															
+		case DLL_THREAD_DETACH:															
+		case DLL_PROCESS_DETACH:														
+			break;																		
+		}																				
+		return TRUE;																	
+	}
+	
 #endif //_XN_PLATFORM_WIN32_H_

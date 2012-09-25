@@ -22,7 +22,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <CLRSupport>true</CLRSupport>
     <CharacterSet>Unicode</CharacterSet>
-    <UseOfMfc>Static</UseOfMfc>
+    <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -58,16 +58,15 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>OpenNI.lib;XnVNite.lib;user32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>.\Lib;C:\Program Files\Prime Sense\NITE\Lib;C:\Program Files\OpenNI\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>.\Lib;C:\Program Files (x86)\OpenNI\Lib;C:\Program Files (x86)\PrimeSense\NITE\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>libcmtd.lib;libcmt.lib;libc.lib;libcd.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <EntryPointSymbol>
-      </EntryPointSymbol>
+      <EntryPointSymbol></EntryPointSymbol>
       <ForceFileOutput>
       </ForceFileOutput>
       <NoEntryPoint>false</NoEntryPoint>
-      <AdditionalOptions>DllEntryPoint@12
-
+      <AdditionalOptions>
  %(AdditionalOptions)</AdditionalOptions>
+      <TargetMachine>MachineX86</TargetMachine>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -108,6 +107,7 @@
     </ClCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <Target Name="GenerateTargetFrameworkMonikerAttribute" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
 </Project>
