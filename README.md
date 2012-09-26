@@ -21,4 +21,5 @@ The Kinect module for PrimeSensor can be downloaded at: https://github.com/downl
 
 Note:
 =====
-The library *glut32.dll* and XML file *Sample-User.xml* is recommended to reside in the current build configuration to run properly. 
+* The library *glut32.dll* and XML file *Sample-User.xml* is recommended to reside in the current build configuration to run properly.
+* Make sure the drivers for the Kinect is using PrimeSensor's instead of any Microsoft drivers
