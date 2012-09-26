@@ -1,28 +1,21 @@
-// SkeleGlutv0.1.cpp : main project file.
-
 #include "stdafx.h"
-#include "glut.h"
+#include "MouseControl.h"
+#include <GL\glut.h>
 #include <XnOpenNI.h>
 #include <XnList.h>
 #include <XnCppWrapper.h>
 #include <XnCodecIDs.h>
-#include "MouseControl.h"
 #include <math.h>
-#include <Windows.h>  
+#include <Windows.h>
 
-
-
-
-
+// Required file for populating the PrimeSense node
 #define SAMPLE_XML_PATH "Sample-User.xml"
-
-
 
 
 xn::Context g_Context;
 xn::DepthGenerator g_DepthGenerator;
 xn::UserGenerator g_UserGenerator;
-MouseControl *mouse = new MouseControl ();
+MouseControl *mouse = new MouseControl();
 xn::SceneAnalyzer g_SceneAnalyzer;
 double g_LastSmoothingFactor = 0.0;
 
@@ -48,21 +41,16 @@ XnSkeletonJoint getJoint(int a);
 void DrawBones(XnUserID user, xn::UserGenerator g_UserGenerator );
 void SendKeyDown(char charCode);
 void SendKeyUp(char charCode);
- void SendVKDown(unsigned short scanCode);
-	  void SendVKUp(unsigned short scanCode);
+void SendVKDown(unsigned short scanCode);
+void SendVKUp(unsigned short scanCode);
 
 
 
 void initScene() {
-
 	glEnable(GL_DEPTH_TEST);
-
-
 }
 
 void orientMe(float ang) {
-
-
 	lx += sin(ang);
 	//lz += -cos(ang);
 	glLoadIdentity();
@@ -81,11 +69,11 @@ void moveMeFlat(int i) {
 			  0.0f,1.0f,0.0f);
 
 }
+
 void drawJoint(XnUserID user, xn::UserGenerator g_UserGenerator,XnSkeletonJoint eJoint)
 {
 	static int i=0;
 
-	
 	XnStatus rc = XN_STATUS_OK;
 	XnSkeletonJointPosition p;
 	XnPoint3D point;
@@ -93,21 +81,18 @@ void drawJoint(XnUserID user, xn::UserGenerator g_UserGenerator,XnSkeletonJoint 
 	
 	float X,Y;
 
+	glPushMatrix();
+	rc=g_UserGenerator.GetSkeletonCap().GetSkeletonJointPosition(user, eJoint, p);
+	//printf("%s failed: %d\n",xnGetStatusString(rc),joint);
+	point=p.position;
+	g_DepthGenerator.ConvertRealWorldToProjective(1, &point, &point);
+	//printf("%f , %f\n",point.X,point.Y);
 		
-		glPushMatrix();
-		rc=g_UserGenerator.GetSkeletonCap().GetSkeletonJointPosition(user, eJoint, p);
-		//printf("%s failed: %d\n",xnGetStatusString(rc),joint);
-		point=p.position;
-		g_DepthGenerator.ConvertRealWorldToProjective(1, &point, &point);
-		//printf("%f , %f\n",point.X,point.Y);
-		
-			
-		
-				
-		X=(point.X-320)/320; 
-		Y=-1*(point.Y-240)/240;
+	X=(point.X-320)/320; 
+	Y=-1*(point.Y-240)/240;
 	glPushMatrix();
 	glTranslatef(X, Y,0);
+
 	if (eJoint==1){
 		glutSolidSphere(0.05f,20,20);
 		//printf("head x:%f y:%f ",X,Y);
@@ -120,299 +105,233 @@ void drawJoint(XnUserID user, xn::UserGenerator g_UserGenerator,XnSkeletonJoint 
 	glPopMatrix();
 	
 	i++;
-	
 }
-	void DrawSingleUser(XnUserID user, xn::UserGenerator g_UserGenerator)
+
+
+void DrawSingleUser(XnUserID user, xn::UserGenerator g_UserGenerator)
 {
-	static int i=0;
-	i++;
-	 int count=0;
-	 XnSkeletonJoint j;
+	static int i=1;
+	int count=0;
+	XnSkeletonJoint j;
 	
-		for (count=1;count<25;count++)
-		{
+	for (count=1;count<25;count++) {
 			
-			glColor3f(count/24.0f, count/48.0f, 1.0f);
-			j=getJoint(count);
-			if (!g_UserGenerator.GetSkeletonCap().IsJointAvailable(j))continue;
+		glColor3f(count/24.0f, count/48.0f, 1.0f);
+		j=getJoint(count);
+
+		if (!g_UserGenerator.GetSkeletonCap().IsJointAvailable(j))continue;
 			drawJoint(user,g_UserGenerator,j);
 		}
-	//if (i==1)
-		//for (count=0;count<1000000;count++)gluLookAt(x,y,z,count/2000000.0f,count/2000000.0f,-1.0f,0.0f,1.0f,0.0f);
-		//lx=X;ly=Y;lz=point.Z/3000;}
 	}
-	void getJointPoint(XnUserID user, xn::UserGenerator g_UserGenerator,XnSkeletonJoint joint,XnPoint3D* point)
-   {
+
+	void getJointPoint(XnUserID user, xn::UserGenerator g_UserGenerator,XnSkeletonJoint joint,XnPoint3D* point) {
 	   //this will return a point from the user for a specific joint
 	   XnSkeletonJointPosition skeletonPosition;
 	   g_UserGenerator.GetSkeletonCap().GetSkeletonJointPosition(user, joint, skeletonPosition);
 	   *point=skeletonPosition.position;
-
    }
-void DrawBoundaries (XnPoint3D refL,XnPoint3D refR,XnPoint3D Left,XnPoint3D Right)
-{	// draw boundary box
-		float zLDiff,zRDiff;
-		static float zL=1;
-		g_DepthGenerator.ConvertRealWorldToProjective(1, &refL, &refL);
-		g_DepthGenerator.ConvertRealWorldToProjective(1, &refR, &refR);
-		g_DepthGenerator.ConvertRealWorldToProjective(1, &Left, &Left);
-		g_DepthGenerator.ConvertRealWorldToProjective(1, &Right, &Right);
 
-		zLDiff=refL.Z-Left.Z;
-		zRDiff=refR.Z-Right.Z;
+void DrawBoundaries (XnPoint3D refL,XnPoint3D refR,XnPoint3D Left,XnPoint3D Right) {	
+	// draw boundary box
+	float zLDiff,zRDiff;
+	static float zL=1;
+	g_DepthGenerator.ConvertRealWorldToProjective(1, &refL, &refL);
+	g_DepthGenerator.ConvertRealWorldToProjective(1, &refR, &refR);
+	g_DepthGenerator.ConvertRealWorldToProjective(1, &Left, &Left);
+	g_DepthGenerator.ConvertRealWorldToProjective(1, &Right, &Right);
+
+	zLDiff=refL.Z-Left.Z;
+	zRDiff=refR.Z-Right.Z;
 	glLineWidth(3.0);
+
 	//--Top Left HanD
-		glBegin(GL_LINES);
-			glVertex3f( (refL.X-345)/320,-1*(refL.Y-200)/240, -1.0f);
-			glVertex3f( (refL.X-295)/320,-1*(refL.Y-200)/240, -1.0f);
-		glEnd();
-		//--Bottom
-		glBegin(GL_LINES);
-			glVertex3f( (refL.X-345)/320,-1*(refL.Y-270)/240, -1.0f);
-			glVertex3f( (refL.X-295)/320,-1*(refL.Y-270)/240, -1.0f);
-		glEnd();
-		//--Left
-		glBegin(GL_LINES);
-			glVertex3f( (refL.X-345)/320,-1*(refL.Y-210)/240, -1.0f);
-			glVertex3f( (refL.X-345)/320,-1*(refL.Y-270)/240, -1.0f);
-		glEnd();
-		//--Right
-		glBegin(GL_LINES);
-			glVertex3f( (refL.X-345)/320,-1*(refL.Y-210)/240, -1.0f);
-			glVertex3f( (refL.X-345)/320,-1*(refL.Y-270)/240, -1.0f);
-		glEnd();
+	glBegin(GL_LINES);
+		glVertex3f( (refL.X-345)/320,-1*(refL.Y-200)/240, -1.0f);
+		glVertex3f( (refL.X-295)/320,-1*(refL.Y-200)/240, -1.0f);
+	glEnd();
+	//--Bottom
+	glBegin(GL_LINES);
+		glVertex3f( (refL.X-345)/320,-1*(refL.Y-270)/240, -1.0f);
+		glVertex3f( (refL.X-295)/320,-1*(refL.Y-270)/240, -1.0f);
+	glEnd();
+	//--Left
+	glBegin(GL_LINES);
+		glVertex3f( (refL.X-345)/320,-1*(refL.Y-210)/240, -1.0f);
+		glVertex3f( (refL.X-345)/320,-1*(refL.Y-270)/240, -1.0f);
+	glEnd();
+	//--Right
+	glBegin(GL_LINES);
+		glVertex3f( (refL.X-345)/320,-1*(refL.Y-210)/240, -1.0f);
+		glVertex3f( (refL.X-345)/320,-1*(refL.Y-270)/240, -1.0f);
+	glEnd();
 		
-		glBegin(GL_LINES);
-			glVertex3f( (refL.X-295)/320,-1*(refL.Y-210)/240, -1.0f);
-			glVertex3f( (refL.X-295)/320,-1*(refL.Y-270)/240, -1.0f);
-		glEnd();
-		//--RIght Hand Top
-		glBegin(GL_LINES);
-			glVertex3f( (refR.X-335)/320,-1*(refR.Y-210)/240, -1.0f);
-			glVertex3f( (refR.X-305)/320,-1*(refR.Y-210)/240, -1.0f);
-		glEnd();
-		//--Bottom
-		glBegin(GL_LINES);
-			glVertex3f( (refR.X-345)/320,-1*(refR.Y-270)/240, -1.0f);
-			glVertex3f( (refR.X-295)/320,-1*(refR.Y-270)/240, -1.0f);
-		glEnd();
-		//--Left
-		glBegin(GL_LINES);
-			glVertex3f( (refR.X-345)/320,-1*(refR.Y-210)/240, -1.0f);
-			glVertex3f( (refR.X-345)/320,-1*(refR.Y-270)/240, -1.0f);
-		glEnd();
-		//--Right
-		glBegin(GL_LINES);
-			glVertex3f( (refR.X-295)/320,-1*(refR.Y-210)/240, -1.0f);
-			glVertex3f( (refR.X-295)/320,-1*(refR.Y-270)/240, -1.0f);
-		glEnd();
+	glBegin(GL_LINES);
+		glVertex3f( (refL.X-295)/320,-1*(refL.Y-210)/240, -1.0f);
+		glVertex3f( (refL.X-295)/320,-1*(refL.Y-270)/240, -1.0f);
+	glEnd();
+	//--RIght Hand Top
+	glBegin(GL_LINES);
+		glVertex3f( (refR.X-335)/320,-1*(refR.Y-210)/240, -1.0f);
+		glVertex3f( (refR.X-305)/320,-1*(refR.Y-210)/240, -1.0f);
+	glEnd();
+	//--Bottom
+	glBegin(GL_LINES);
+		glVertex3f( (refR.X-345)/320,-1*(refR.Y-270)/240, -1.0f);
+		glVertex3f( (refR.X-295)/320,-1*(refR.Y-270)/240, -1.0f);
+	glEnd();
+	//--Left
+	glBegin(GL_LINES);
+		glVertex3f( (refR.X-345)/320,-1*(refR.Y-210)/240, -1.0f);
+		glVertex3f( (refR.X-345)/320,-1*(refR.Y-270)/240, -1.0f);
+	glEnd();
+	//--Right
+	glBegin(GL_LINES);
+		glVertex3f( (refR.X-295)/320,-1*(refR.Y-210)/240, -1.0f);
+		glVertex3f( (refR.X-295)/320,-1*(refR.Y-270)/240, -1.0f);
+	glEnd();
 
 			
-		glBegin(GL_LINES);
-			glVertex3f( 0,.9, -1.0f);
-			glVertex3f( 0,.7, -1.0f);
-		glEnd();
+	glBegin(GL_LINES);
+		glVertex3f( 0,.9, -1.0f);
+		glVertex3f( 0,.7, -1.0f);
+	glEnd();
 	
 		
 			glPushMatrix();
 	glTranslatef(0, 0.8f,0);
 	glutSolidSphere(.025f,20,20);
 	glPopMatrix();
-
-		
 }
-	void handsBodyMovementLogic(XnPoint3D refL,XnPoint3D refR,XnPoint3D Left,XnPoint3D Right)
-	{
-		
-		float xLDiff,xRDiff,zLDiff,zRDiff,yLDiff,yRDiff;
-		XnPoint3D cL,cR,cLR,cRR; // change these!!! once testing is done
-		
-		g_DepthGenerator.ConvertRealWorldToProjective(1, &refL, &cLR);
-		g_DepthGenerator.ConvertRealWorldToProjective(1, &refR, &cRR);
-		g_DepthGenerator.ConvertRealWorldToProjective(1, &Left, &cL);
-		g_DepthGenerator.ConvertRealWorldToProjective(1, &Right, &cR);
-		//printf("RL: %f   L: %f \n RR: %f    R:  %f\n",cLR.Z,cL.Z,cRR.Z,cR.Z);
-		xLDiff=cLR.X-cL.X;
-		xRDiff=cRR.X-cR.X;
-		zLDiff=cLR.Z-cL.Z;
-		zRDiff=cRR.Z-cR.Z;
-		yLDiff=cLR.Y-cL.Y;
-		yRDiff=cRR.Y-cR.Y;
-	
 
-		if (xLDiff>20 && xRDiff<-20)
-		{
-			
-
+void handsBodyMovementLogic(XnPoint3D refL,XnPoint3D refR,XnPoint3D Left,XnPoint3D Right) {
+	float xLDiff,xRDiff,zLDiff,zRDiff,yLDiff,yRDiff;
+	XnPoint3D cL,cR,cLR,cRR; // change these!!! once testing is done
 		
-			SendKeyDown('w');
-			SendKeyUp('w');
-		
-	
+	g_DepthGenerator.ConvertRealWorldToProjective(1, &refL, &cLR);
+	g_DepthGenerator.ConvertRealWorldToProjective(1, &refR, &cRR);
+	g_DepthGenerator.ConvertRealWorldToProjective(1, &Left, &cL);
+	g_DepthGenerator.ConvertRealWorldToProjective(1, &Right, &cR);
+	//printf("RL: %f   L: %f \n RR: %f    R:  %f\n",cLR.Z,cL.Z,cRR.Z,cR.Z);
 
-		}
-		else if (xLDiff<-20 && xRDiff>20)
-		{
-			
-	
-			SendKeyDown('s');
-			SendKeyUp('s');
-		}
-		if (zLDiff>100  )
-		{
-	
+	xLDiff=cLR.X-cL.X;
+	xRDiff=cRR.X-cR.X;
+	zLDiff=cLR.Z-cL.Z;
+	zRDiff=cRR.Z-cR.Z;
+	yLDiff=cLR.Y-cL.Y;
+	yRDiff=cRR.Y-cR.Y;
+
+
+	if (xLDiff>20 && xRDiff<-20) {
+		SendKeyDown('w');
+		SendKeyUp('w');
+	} else if (xLDiff<-20 && xRDiff>20) {
+		SendKeyDown('s');
+		SendKeyUp('s');
+	}
+
+	if (zLDiff>100  ) {
 		SendKeyUp('d');
-		    SendKeyDown('a');
-			
-			
-
-		}
-		else if (zRDiff>100 )
-		{
-		
+		SendKeyDown('a');
+	} else if (zRDiff>100 ) {
 		SendKeyUp('a');
 		SendKeyDown('d');
-		
-			
-	
-		}
-		else
-		{
-			SendKeyUp('a');
+	} else {
+		SendKeyUp('a');
 		SendKeyUp('d');
-		}
-		if (yLDiff>20 && yRDiff>20 )
-		{
+	}
+
+	if (yLDiff>20 && yRDiff>20 ) {
 		SendVKDown(VK_PRIOR);
 		SendVKUp(VK_NEXT);	
 			//printf("up\n");
-		}
-		else if (yRDiff<-20 && yLDiff<-20)
-		{
+	} else if (yRDiff<-20 && yLDiff<-20) {
 		//printf("Down\n");
 		SendVKDown(VK_NEXT);
 		SendVKUp(VK_PRIOR);	
-			
-	
-		}
-		else{
-			SendVKUp(VK_PRIOR);	
-			SendVKUp(VK_NEXT);
-		}
-		
-		/**zLDiff=abs(refL.Z)-abs(Left.Z);
-		zRDiff=abs(refR.Z)-abs(Right.Z);
-		//printf ("L:  %f\n R: %f\n",abs(refL.X),Right.X);
-		if (xLDiff>20 &&xRDiff>20 ||xLDiff<-20 &&xRDiff<-20)
-		{
-			//printf("ldiff %f rdiff %f \N refl %f  left %f \nrefr %f right %f \n %d \n",xLDiff,xRDiff,refL.X,Left.X,refR.X,Right.X,refL.X>Left.X);
-			if (refL.X>Left.X && refR.X<Right.X)
-			{
-				printf("going forward");
-					r=0.0f;
-					b=1.0f;
-					g=0.0f;
-			}
-			else
-				g=1.0f;
-		}**/
-		
+	} else{
+		SendVKUp(VK_PRIOR);	
+		SendVKUp(VK_NEXT);
 	}
-	void handsLocationLogic(XnUserID user, xn::UserGenerator g_UserGenerator)
-	{
-		//-----!!!!! One thing to think about is that if we move forward or back that we might want to reset the initHands values could change...
-		static int count=0;
+}
 
-		static XnPoint3D refLeftHand,refRightHand;
-		XnPoint3D lPoint,rPoint,head,torso;
+void handsLocationLogic(XnUserID user, xn::UserGenerator g_UserGenerator) {
+	//-----!!!!! One thing to think about is that if we move forward or back that we might want to reset the initHands values could change...
+	static int count=0;
+
+	static XnPoint3D refLeftHand,refRightHand;
+	XnPoint3D lPoint,rPoint,head,torso;
 		
-		getJointPoint(user,g_UserGenerator,XN_SKEL_LEFT_HAND,&lPoint);
-		getJointPoint(user,g_UserGenerator,XN_SKEL_RIGHT_HAND,&rPoint);
-		getJointPoint(user,g_UserGenerator,XN_SKEL_HEAD,&head);
-		getJointPoint(user,g_UserGenerator,XN_SKEL_TORSO,&torso);
+	getJointPoint(user,g_UserGenerator,XN_SKEL_LEFT_HAND,&lPoint);
+	getJointPoint(user,g_UserGenerator,XN_SKEL_RIGHT_HAND,&rPoint);
+	getJointPoint(user,g_UserGenerator,XN_SKEL_HEAD,&head);
+	getJointPoint(user,g_UserGenerator,XN_SKEL_TORSO,&torso);
 
 	
-		if (lPoint.Y>(torso.Y-50)&&lPoint.Y<(head.Y+10) && rPoint.Y>(torso.Y-50)&&rPoint.Y<(head.Y+10))
-		{
-			//This has been modded from original design to only look for both hands in position
-			if (!steady)
-			{
-				count++;
-				if (count>8)
-				{
-					steady=true;
-					count=0;
-				}
+	if (lPoint.Y>(torso.Y-50)&&lPoint.Y<(head.Y+10) && rPoint.Y>(torso.Y-50)&&rPoint.Y<(head.Y+10)) {
+		//This has been modded from original design to only look for both hands in position
+		if (!steady) {
+			count++;
+
+			if (count>8) {
+				steady=true;
+				count=0;
 			}
-			else
-			{
+		} else {
 			//***-- it is now steady; check to see if this is first time through set ref hand points  think about using states in the class for this//
-				if (!initHands)
-				{
-					refLeftHand=lPoint;
-					refRightHand=rPoint;
-					initHands=true;
-					
-				}
-	
-					r=0;
-					b=1.0f;
-					g=0.0f;
-					handsBodyMovementLogic(refLeftHand,refRightHand,lPoint,rPoint);
-					DrawBoundaries (refLeftHand,refRightHand,lPoint,rPoint);
-
-				
-				
-				
+			if (!initHands) {
+				refLeftHand=lPoint;
+				refRightHand=rPoint;
+				initHands=true;
 			}
-			flyPressed=false;
-			
-		}
-		
-		// Checks if both hands are above head if so switch on flying
-		else if (lPoint.Y>(head.Y+20) && rPoint.Y>(head.Y+20))
-		{
-		 if (!flyPressed)
-			{g=1.0f;
+
+			r=0;
 			b=1.0f;
-			r=0.0f;
-			
-			steady=false;
-			count=0;
-			initHands=false;
-			flyPressed=true;
-			printf("FLY");
-			SendKeyDown('f');
-			SendKeyUp('f');
-			SendVKUp(VK_PRIOR);	
-			SendVKUp(VK_NEXT);
-
-		 }
-		}//-- We also reset the values of false and steady as well as initHands, again a states could probably increase readability as well as redundancy.
-		//-- Also need to make sure that the up down and left right buttons are sent back up so not 
-		else
-		{
-
-			steady=false;
-			count=0;
-			initHands=false;
-			flyPressed=false;
-			SendVKUp(VK_PRIOR);	
-			SendVKUp(VK_NEXT);
-			SendKeyUp('a');
-			SendKeyUp('d');
+			g=0.0f;
+			handsBodyMovementLogic(refLeftHand,refRightHand,lPoint,rPoint);
+			DrawBoundaries (refLeftHand,refRightHand,lPoint,rPoint);
 		}
 
-	
-		
-		
+		flyPressed=false;
 	}
+		
+	// Checks if both hands are above head if so switch on flying
+	else if (lPoint.Y>(head.Y+20) && rPoint.Y>(head.Y+20))
+	{
+		if (!flyPressed)
+		{g=1.0f;
+		b=1.0f;
+		r=0.0f;
+			
+		steady=false;
+		count=0;
+		initHands=false;
+		flyPressed=true;
+		printf("FLY");
+		SendKeyDown('f');
+		SendKeyUp('f');
+		SendVKUp(VK_PRIOR);	
+		SendVKUp(VK_NEXT);
 
-void draw_stickfigure()
-{
-	
+		}
+	}//-- We also reset the values of false and steady as well as initHands, again a states could probably increase readability as well as redundancy.
+	//-- Also need to make sure that the up down and left right buttons are sent back up so not 
+	else
+	{
+
+		steady=false;
+		count=0;
+		initHands=false;
+		flyPressed=false;
+		SendVKUp(VK_PRIOR);	
+		SendVKUp(VK_NEXT);
+		SendKeyUp('a');
+		SendKeyUp('d');
+	}
+}
+
+void draw_stickfigure() {
 	float fNewColor = 0;
-	float fMaxDepth;
+
 	xn::DepthMetaData dm;
 	g_DepthGenerator.GetMetaData(dm);
 	XnPoint3D corner = xnCreatePoint3D(dm.XRes(), dm.YRes(), dm.ZRes());
@@ -421,17 +340,16 @@ void draw_stickfigure()
 	XnUserID users[10];
 	XnUInt16 nUsers = 10;
 	
+
 	glPushMatrix();
 	g_UserGenerator.GetUsers(users, nUsers);
-	for (int i = 0; i < nUsers; ++i)
-	{
+
+	for (int i = 0; i < nUsers; ++i) {
 		
-		if (g_UserGenerator.GetSkeletonCap().IsTracking(users[i]))
-		{
+		if (g_UserGenerator.GetSkeletonCap().IsTracking(users[i])) {
 			DrawSingleUser(users[i], g_UserGenerator);
 
-			if(drawB)
-			DrawBones(users[i],g_UserGenerator);
+			if(drawB) DrawBones(users[i],g_UserGenerator);
 			handsLocationLogic(users[i],  g_UserGenerator);
 			/*mouse->Sendposition1(users[i],i,XN_SKEL_LEFT_SHOULDER,XN_SKEL_LEFT_ELBOW, XN_SKEL_LEFT_HAND,g_DepthGenerator,g_UserGenerator);
 			mouse->Sendposition1(users[i],i,XN_SKEL_RIGHT_SHOULDER,XN_SKEL_RIGHT_ELBOW, XN_SKEL_RIGHT_HAND,g_DepthGenerator,g_UserGenerator);
@@ -441,10 +359,8 @@ void draw_stickfigure()
 	}
 
 		glPopMatrix();
-		
-	
-	
 }
+
 DWORD WINAPI EEThreadProc(LPVOID lpThreadParameter)
 {
 	{
@@ -453,6 +369,7 @@ DWORD WINAPI EEThreadProc(LPVOID lpThreadParameter)
 	}
 	return 0;
 }
+
 void renderScene(void) {
 
 	if (deltaMove)
@@ -462,7 +379,7 @@ void renderScene(void) {
 		orientMe(angle);
 	}
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-// Draw ground
+	// Draw ground
 
 	glColor3f(0.9f, 0.0f, 0.0f);
 	//glBegin(GL_QUADS);
@@ -474,36 +391,27 @@ void renderScene(void) {
 		
 	//glPushMatrix();
 	glBegin(GL_QUADS);
-		glVertex3f(-10.0f,-1*cy +0.01f, -1.0f);
-		glVertex3f(-10.0f,-1*cy-0.01f,  -1.0f);
-		glVertex3f( 10.0f, -1*cy-0.01f,  -1.0f);
-		glVertex3f( 10.0f, -1*cy+0.01f, -1.0f);
-		glEnd();
+	glVertex3f(-10.0f,-1*cy +0.01f, -1.0f);
+	glVertex3f(-10.0f,-1*cy-0.01f,  -1.0f);
+	glVertex3f( 10.0f, -1*cy-0.01f,  -1.0f);
+	glVertex3f( 10.0f, -1*cy+0.01f, -1.0f);
+	glEnd();
 
 	glBegin(GL_QUADS);
-		glVertex3f( cx+0.01,-10.0f, -1.0f);
-		glVertex3f(cx-0.01f,-10.0f,  -1.0f);
-		glVertex3f( cx-0.01f,10.0f,   -1.0f);
-		glVertex3f( cx+0.01f,10.0f,  -1.0f);
-		glEnd();
+	glVertex3f( cx+0.01,-10.0f, -1.0f);
+	glVertex3f(cx-0.01f,-10.0f,  -1.0f);
+	glVertex3f( cx-0.01f,10.0f,   -1.0f);
+	glVertex3f( cx+0.01f,10.0f,  -1.0f);
+	glEnd();
 	
-	
-
-
-		
-		
-	
-
-
-		
 	//glPopMatrix();
 	EEThreadProc(NULL);
 	draw_stickfigure();
-// Draw 36 SnowMen
-
+	// Draw 36 SnowMen
 
 	glutSwapBuffers();
 }
+
 void pressKey(int key, int x, int y) {
 
 	switch (key) {
@@ -534,7 +442,7 @@ void releaseKey(int key, int x, int y) {
 	}
 }
 
-	void XN_CALLBACK_TYPE NewUser(xn::UserGenerator& generator, XnUserID user, void* pCookie)
+void XN_CALLBACK_TYPE NewUser(xn::UserGenerator& generator, XnUserID user, void* pCookie)
 {
 	printf("New user identified: %d\n", user);
 	g_UserGenerator.GetPoseDetectionCap().StartPoseDetection("Psi", user);
@@ -549,6 +457,7 @@ void XN_CALLBACK_TYPE CalibrationStart(xn::SkeletonCapability& skeleton, XnUserI
 {
 	printf("Calibration start for user %d\n", user);
 }
+
 void XN_CALLBACK_TYPE CalibrationEnd(xn::SkeletonCapability& skeleton, XnUserID user, XnBool bSuccess, void* pCookie)
 {
 	printf("Calibration complete for user %d: %s\n", user, bSuccess?"Success":"Failure");
@@ -561,24 +470,28 @@ void XN_CALLBACK_TYPE CalibrationEnd(xn::SkeletonCapability& skeleton, XnUserID 
 		g_UserGenerator.GetPoseDetectionCap().StartPoseDetection("Psi", user);
 	}
 }
+
 void XN_CALLBACK_TYPE PoseDetected(xn::PoseDetectionCapability& poseDetection, const XnChar* strPose, XnUserID nId, void* pCookie)
 {
 	printf("Pose '%s' detected for user %d\n", strPose, nId);
 	g_UserGenerator.GetSkeletonCap().RequestCalibration(nId, FALSE);
 	g_UserGenerator.GetPoseDetectionCap().StopPoseDetection(nId);
 }
+
 #define CHECK_RC(rc, what)											\
 	if (rc != XN_STATUS_OK)											\
 	{																\
 		printf("%s failed: %s\n", what, xnGetStatusString(rc));		\
 		return rc;													\
 	}
+
 int main(int argc, char **argv)
 {
 		
 	XnStatus rc = XN_STATUS_OK;
 
 	rc = g_Context.InitFromXmlFile(SAMPLE_XML_PATH);
+
 	CHECK_RC(rc, "InitFromXml");
 
 	rc = g_Context.FindExistingNode(XN_NODE_TYPE_DEPTH, g_DepthGenerator);
@@ -625,82 +538,84 @@ int main(int argc, char **argv)
 
 	return(0);
 }
-XnSkeletonJoint getJoint(int a)
-{
 
+XnSkeletonJoint getJoint(int a) {
 	switch (a){
-	case 1:
-		return XN_SKEL_HEAD;
+		case 1:
+			return XN_SKEL_HEAD;
 			break;
-	case 2:
-		return XN_SKEL_NECK	;
+		case 2:
+			return XN_SKEL_NECK	;
 			break;
-			
-	case 3:
-		return XN_SKEL_TORSO;	
-		break;
-	case 4:
-		return XN_SKEL_WAIST;	
-		break;
-	case 5:
-		return XN_SKEL_LEFT_COLLAR;	
+		case 3:
+			return XN_SKEL_TORSO;	
 			break;
-	case 6:
-		return XN_SKEL_LEFT_SHOULDER;	
+		case 4:
+			return XN_SKEL_WAIST;	
 			break;
-	case 7:
-		return XN_SKEL_LEFT_ELBOW	;
+		case 5:
+			return XN_SKEL_LEFT_COLLAR;	
 			break;
-	case 8:	
-		return XN_SKEL_LEFT_WRIST	;	
+		case 6:
+			return XN_SKEL_LEFT_SHOULDER;	
 			break;
-	case 9:
-		return XN_SKEL_LEFT_HAND	;	
+		case 7:
+			return XN_SKEL_LEFT_ELBOW	;
 			break;
-	case 10:
-		return XN_SKEL_LEFT_FINGERTIP	;
+		case 8:	
+			return XN_SKEL_LEFT_WRIST	;	
 			break;
-	case 11:
-		return XN_SKEL_RIGHT_COLLAR	;
+		case 9:
+			return XN_SKEL_LEFT_HAND	;	
 			break;
-	case 12:
-		return XN_SKEL_RIGHT_SHOULDER	;
+		case 10:
+			return XN_SKEL_LEFT_FINGERTIP	;
 			break;
-	case 13:
-		return XN_SKEL_RIGHT_ELBOW	;	
+		case 11:
+			return XN_SKEL_RIGHT_COLLAR	;
 			break;
-	case 14:
-		return XN_SKEL_RIGHT_WRIST	;	
+		case 12:
+			return XN_SKEL_RIGHT_SHOULDER	;
 			break;
-	case 15:
-		return XN_SKEL_RIGHT_HAND	;
+		case 13:
+			return XN_SKEL_RIGHT_ELBOW	;	
 			break;
-	case 16:
-		return XN_SKEL_RIGHT_FINGERTIP	;
+		case 14:
+			return XN_SKEL_RIGHT_WRIST	;	
 			break;
-	case 17:
-		return XN_SKEL_LEFT_HIP	;
+		case 15:
+			return XN_SKEL_RIGHT_HAND	;
 			break;
-	case 18:	
-		return XN_SKEL_LEFT_KNEE	;
+		case 16:
+			return XN_SKEL_RIGHT_FINGERTIP	;
 			break;
-	case 19:
-		return XN_SKEL_LEFT_ANKLE	;	
+		case 17:
+			return XN_SKEL_LEFT_HIP	;
 			break;
-	case 20:
-		return XN_SKEL_LEFT_FOOT	;
+		case 18:	
+			return XN_SKEL_LEFT_KNEE	;
 			break;
-	case 21:
-		return XN_SKEL_RIGHT_HIP	;
+		case 19:
+			return XN_SKEL_LEFT_ANKLE	;	
 			break;
-	case 22:	
-		return XN_SKEL_RIGHT_KNEE	;
+		case 20:
+			return XN_SKEL_LEFT_FOOT	;
 			break;
-	case 23:
-		return XN_SKEL_RIGHT_ANKLE	;
+		case 21:
+			return XN_SKEL_RIGHT_HIP	;
 			break;
-	case 24:
-		return XN_SKEL_RIGHT_FOOT	;
+		case 22:	
+			return XN_SKEL_RIGHT_KNEE	;
+			break;
+		case 23:
+			return XN_SKEL_RIGHT_ANKLE	;
+			break;
+		case 24:
+			return XN_SKEL_RIGHT_FOOT	;
+			break;
+		default:
+			// setting default case to case 1
+			return XN_SKEL_HEAD;
 			break;
 	}
 }
@@ -713,6 +628,7 @@ void drawStickPoint(XnPoint3D point)
 	float fV = fY + 0.5;												
 	glVertex3f(fX, fY, 0.0f);	
 }
+
 void drawStickLine(XnUserID user, xn::UserGenerator userGenerator, XnSkeletonJoint joint1, XnSkeletonJoint joint2)
 {
 	XnSkeletonJointPosition pos1, pos2;
@@ -738,6 +654,7 @@ void drawStickLine(XnUserID user, xn::UserGenerator userGenerator, XnSkeletonJoi
 	drawStickPoint(pos2.position);
 		
 }
+
 void DrawBones(XnUserID user, xn::UserGenerator g_UserGenerator ){
 	glPushMatrix();
 		glLineWidth(3.0);
@@ -764,41 +681,33 @@ void DrawBones(XnUserID user, xn::UserGenerator g_UserGenerator ){
 	glPopMatrix();
 }
 
+ void SendVKUp(unsigned short scanCode) {	
+	INPUT inputUp;
+	inputUp.type = INPUT_KEYBOARD;
+	inputUp.ki.dwFlags = KEYEVENTF_KEYUP;
+	inputUp.ki.wVk = scanCode;
+	SendInput( 1, &inputUp, sizeof(inputUp) );
+}
 
-
- void SendVKUp(unsigned short scanCode)
-		{
-		
-			INPUT inputUp;
-			inputUp.type = INPUT_KEYBOARD;
-			inputUp.ki.dwFlags = KEYEVENTF_KEYUP;
-			inputUp.ki.wVk = scanCode;
-			SendInput( 1, &inputUp, sizeof(inputUp) );
-		}
-
- void SendVKDown(unsigned short scanCode)
-		{
-		
-			INPUT inputDown;
-			inputDown.type = INPUT_KEYBOARD;
-			inputDown.ki.dwFlags = 0;
-			inputDown.ki.wVk = scanCode;
-			SendInput( 1, &inputDown, sizeof(inputDown) );
-		}
+ void SendVKDown(unsigned short scanCode) {
+	INPUT inputDown;
+	inputDown.type = INPUT_KEYBOARD;
+	inputDown.ki.dwFlags = 0;
+	inputDown.ki.wVk = scanCode;
+	SendInput( 1, &inputDown, sizeof(inputDown) );
+}
 	
- void SendVKCode(unsigned short scanCode)
-		{
-			SendVKDown(scanCode);
-			SendVKUp(scanCode);
-		}
-void SendKeyDown(char charCode)
-		{
-			SendVKDown((unsigned short)VkKeyScanA(charCode));
-		}
+ void SendVKCode(unsigned short scanCode) {
+	SendVKDown(scanCode);
+	SendVKUp(scanCode);
+}
 
- void SendKeyUp(char charCode)
-		{
-			SendVKUp((unsigned short)VkKeyScanA(charCode));
-		}
+void SendKeyDown(char charCode) {
+	SendVKDown((unsigned short)VkKeyScanA(charCode));
+}
+
+ void SendKeyUp(char charCode) {
+	SendVKUp((unsigned short)VkKeyScanA(charCode));
+}
 
 	
