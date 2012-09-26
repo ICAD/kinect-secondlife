@@ -9,11 +9,11 @@ OpenNI Libraries
 The following can be downloaded at: http://openni.org/Downloads/OpenNIModules.aspx
 
 1. OpenNI Binaries
-> * Unstable build for Windows x86 v1.5.4.0 development edition
+	* Unstable build for Windows x86 v1.5.4.0 development edition
 2. OpenNI Compliant Middleware Binaries 
-> * PrimeSense NITE Unstable build for Windows x86 v1.5.2.21 development edition
+	* PrimeSense NITE Unstable build for Windows x86 v1.5.2.21 development edition
 3. OpenNI Compliant Hardware Binaries
-> * PrimeSensor Module Unstable build for Windows x86 v5.1.2.1
+	* PrimeSensor Module Unstable build for Windows x86 v5.1.2.1
 
 PrimeSensor Kinect Drivers
 --------------------------
