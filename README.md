@@ -1,38 +1,24 @@
 Kinect SecondLife
 =================
+This project connects the XBOX 360 Kinect to SecondLife
 
+Libraries required
+==================
+OpenNI Libraries
+----------------
+The following can be downloaded at: http://openni.org/Downloads/OpenNIModules.aspx
 
-    APPLICATION : CameraRepositioning Project Overview
-======================================================
+1. OpenNI Binaries
+> * Unstable build for Windows x86 v1.5.4.0 development edition
+2. OpenNI Compliant Middleware Binaries 
+> * PrimeSense NITE Unstable build for Windows x86 v1.5.2.21 development edition
+3. OpenNI Compliant Hardware Binaries
+> * PrimeSensor Module Unstable build for Windows x86 v5.1.2.1
 
-AppWizard has created this CameraRepositioning Application for you.  
+PrimeSensor Kinect Drivers
+--------------------------
+The Kinect module for PrimeSensor can be downloaded at: https://github.com/downloads/avin2/SensorKinect/SensorKinect093-Bin-Win32-v5.1.2.1.msi
 
-This file contains a summary of what you will find in each of the files that
-make up your CameraRepositioning application.
-
-CameraRepositioning.vcxproj
-    This is the main project file for VC++ projects generated using an Application Wizard. 
-    It contains information about the version of Visual C++ that generated the file, and 
-    information about the platforms, configurations, and project features selected with the
-    Application Wizard.
-
-CameraRepositioning.vcxproj.filters
-    This is the filters file for VC++ projects generated using an Application Wizard. 
-    It contains information about the association between the files in your project 
-    and the filters. This association is used in the IDE to show grouping of files with
-    similar extensions under a specific node (for e.g. ".cpp" files are associated with the
-    "Source Files" filter).
-
-CameraRepositioning.cpp
-    This is the main application source file.
-
-AssemblyInfo.cpp
-	Contains custom attributes for modifying assembly metadata.
-
-/////////////////////////////////////////////////////////////////////////////
-Other notes:
-
-AppWizard uses "TODO:" to indicate parts of the source code you
-should add to or customize.
-
-/////////////////////////////////////////////////////////////////////////////
+Note:
+=====
+The library *glut32.dll* and XML file *Sample-User.xml* is recommended to reside in the current build configuration to run properly. 
